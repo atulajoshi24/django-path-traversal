@@ -5,11 +5,12 @@ import os
 import validators
 import urllib
 import json
+import re
 
 BASE_DIR = "/home/user/"
 
 def serve_file(request): 
-    filename = request.GET.get('filename')
+    filename = request.GET.get('file')
     file_path = os.path.join(BASE_DIR, filename)
     print("file_path:", file_path)  # Debugging line
     if os.path.exists(file_path):
@@ -20,8 +21,17 @@ def serve_file(request):
         return HttpResponse("File not found", status=404)
     
 
+def validate_filename(filename):
+    if re.fullmatch(r"[A-Za-z0-9-.]+", filename):
+        return True
+    else:
+        return False
+
+
 def serve_file_secure(request): 
-    filename = request.GET.get('filename')
+    filename = request.GET.get('file')
+    if not validate_filename(filename):
+       return HttpResponse("Wrong file name passed", status=500) 
     file_path = os.path.join(BASE_DIR, filename)
     print("file_path:", file_path)  # Debugging line
     resolved = os.path.realpath(file_path)
